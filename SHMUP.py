@@ -1,5 +1,6 @@
 import pygame
 import random
+import pygame.math
 from os import path
 
 #[Settings]
@@ -16,32 +17,12 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
-# Comment test
-
 # initialize pygame and create window
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Shmup!")
 clock = pygame.time.Clock()
-
-#Load BG
-background = pygame.image.load(path.join(img_dir, 'space.jpg')).convert()
-background_rect = background.get_rect
-
-#Draw BG
-screen.fill(BLACK)
-screen.blit(background, background_rect)
-all_sprites.draw(screen)
-
-# Load all game graphics
-player_img = pygame.image.load(path.join(img_dir, "ship1.png")).convert()
-bullet_img = pygame.image.load(path.join(img_dir, "bubble.png")).convert()
-
-
-
-
-
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -82,16 +63,14 @@ class Mob(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
         self.rect.y = random.randrange(-100, -40)
-        self.speedy = random.randrange(1, 8)
-        self.speedx = random.randrange(-3, 3)
+        self.speedy = 4
+        self.speedx = 0
 
     def update(self):
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
-            self.rect.x = random.randrange(WIDTH - self.rect.width)
-            self.rect.y = random.randrange(-100, -40)
-            self.speedy = random.randrange(1, 8)
+            self.kill()
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -114,16 +93,25 @@ mobs = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
-for i in range(8):
+
+mob_spawn_index = 0
+mob_spawns = [0.5, 1, 1, 3, 3, 3, 3, 3.5, 4, 4.2, 4.5, 4.8, 7, 7, 7, 7, 7]
+runtime = 0
+
+for i in range(1):
     m = Mob()
     all_sprites.add(m)
     mobs.add(m)
+
 
 # Game loop
 running = True
 while running:
     # keep loop running at the right speed
     clock.tick(FPS)
+    print(clock.get_time())
+    runtime += clock.get_time() / 1000
+    
     # Process input (events)
     for event in pygame.event.get():
         # check for closing window
@@ -138,7 +126,10 @@ while running:
 
     # check to see if a bullet hit a mob
     hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
-    for hit in hits:
+
+    # print(mob_spawn_index)
+    while mob_spawn_index < len(mob_spawns) and runtime > mob_spawns[mob_spawn_index]:
+        mob_spawn_index += 1
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
