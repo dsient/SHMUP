@@ -46,19 +46,23 @@ bullet_img = pygame.image.load(path.join(img_dir, "bubble.png")).convert()
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = player_img
+        self.image = pygame.Surface((50, 40))
+        self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 0
+        self.acceleration = 0.2
 
     def update(self):
-        self.speedx = 0
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT]:
-            self.speedx = -8
-        if keystate[pygame.K_RIGHT]:
-            self.speedx = 8
+            self.speedx += self.acceleration * (-8 - self.speedx)
+        elif keystate[pygame.K_RIGHT]:
+            self.speedx += self.acceleration * ( 8 - self.speedx)
+        else:
+            self.speedx += self.acceleration * ( 0 - self.speedx)
+        
         self.rect.x += self.speedx
         if self.rect.right > WIDTH:
             self.rect.right = WIDTH
