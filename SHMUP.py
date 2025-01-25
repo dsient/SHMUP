@@ -1,5 +1,6 @@
 import pygame
 import random
+import pygame.math
 from os import path
 
 #[Settings]
