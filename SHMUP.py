@@ -1,14 +1,15 @@
 import pygame
 import random
+import pygame.math
 from os import path
 
-# [Settings]
+#[Settings]
 img_dir = path.join(path.dirname(__file__), 'img')
 WIDTH = 480
 HEIGHT = 600
 FPS = 60
 
-# Define colors
+# define colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -17,39 +18,22 @@ BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 DARK_GRAY = (100, 100, 100)
 
-# Initialize pygame and create the window
+# initialize pygame and create window
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Shmup!")
 clock = pygame.time.Clock()
 
-# Load background
-background = pygame.image.load(path.join(img_dir, 'space.jpg')).convert()
-background_rect = background.get_rect()
-
-# Load all game graphics
-player_img = pygame.image.load(path.join(img_dir, "ship1.png")).convert()
-player_img = pygame.transform.scale(player_img, (50, 38))  # Scale to desired size
-player_img.set_colorkey(BLACK)
-
-bullet_img = pygame.image.load(path.join(img_dir, "bubble.png")).convert()
-#bullet_img.set_colorkey(BLACK)  # Remove background from the bullet sprite
-
-# Classes
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = player_img
+        self.image = pygame.Surface((50, 40))
+        self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.rect.centerx = WIDTH / 2
         self.rect.bottom = HEIGHT * 3/4
         self.speedx = 0
-<<<<<<< Updated upstream
-        self.acceleration = 0.2
-        self.health = 1 
-
-=======
         self.speedy = 0
 
         self.run_speed = 0
@@ -59,7 +43,6 @@ class Player(pygame.sprite.Sprite):
         self.gravity = 0.4
 
         self.health = 1
->>>>>>> Stashed changes
 
     def update(self):
         keystate = pygame.key.get_pressed()
@@ -104,25 +87,15 @@ class Mob(pygame.sprite.Sprite):
         self.image.fill(RED)
         self.rect = self.image.get_rect()
         self.rect.x = random.randrange(WIDTH - self.rect.width)
-<<<<<<< Updated upstream
-        self.rect.y = random.randrange(-100, -40)
-        self.speedy = random.randrange(1, 8)
-        self.speedx = random.randrange(-3, 3)
-=======
         self.rect.y = -10
         self.speedy = 4
         self.speedx = 0
->>>>>>> Stashed changes
 
     def update(self):
         self.rect.x += self.speedx
         self.rect.y += self.speedy
         if self.rect.top > HEIGHT + 10 or self.rect.left < -25 or self.rect.right > WIDTH + 20:
-            self.rect.x = random.randrange(WIDTH - self.rect.width)
-            self.rect.y = random.randrange(-100, -40)
-            self.speedy = random.randrange(1, 8)
-            self.image = pygame.Surface((random.randint(20, 50), random.randint(20, 50)))
-
+            self.kill()
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -139,13 +112,10 @@ class Bullet(pygame.sprite.Sprite):
     def update(self):
         self.rect.x += self.speedx
         self.rect.y += self.speedy
-        # Kill the bullet if it moves off the top of the screen
+        # kill if it moves off the top of the screen
         if self.rect.bottom < 0:
             self.kill()
 
-<<<<<<< Updated upstream
-# Sprite groups
-=======
         self.speedx *= 0.98
         self.speedy *= 0.98
         
@@ -173,22 +143,13 @@ class Wind(pygame.sprite.Sprite):
 
 is_started = False
 
->>>>>>> Stashed changes
 all_sprites = pygame.sprite.Group()
 back_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 winds = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-
-# Create player and mobs
 player = Player()
 all_sprites.add(player)
-<<<<<<< Updated upstream
-for i in range(8):
-    m = Mob()
-    all_sprites.add(m)
-    mobs.add(m)
-=======
 
 mob_spawn_index = 0
 mob_spawns = [0.5, 2, 2, 2.9, 3.1, 3.3, 3.5, 5.6, 5.7, 5.8, 5.9, 6, 6.1, 6.2]
@@ -196,25 +157,21 @@ mob_spawns = [0.5, 2, 2, 2.9, 3.1, 3.3, 3.5, 5.6, 5.7, 5.8, 5.9, 6, 6.1, 6.2]
 wind_spawn_index = 0
 
 runtime = 0
->>>>>>> Stashed changes
 
 # Game loop
 running = True
 while running:
-    # Keep loop running at the right speed
+    # keep loop running at the right speed
     clock.tick(FPS)
 
-<<<<<<< Updated upstream
-=======
     if is_started:
         runtime += clock.get_time() / 1000
     else:
         decoy = 0
     
->>>>>>> Stashed changes
     # Process input (events)
     for event in pygame.event.get():
-        # Check for closing window
+        # check for closing window
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
@@ -225,31 +182,18 @@ while running:
     back_sprites.update()
     all_sprites.update()
 
-    # Check for collisions
+    # check to see if a bullet hit a mob
     hits = pygame.sprite.groupcollide(mobs, bullets, True, True)
-    for hit in hits:
+
+    # print(mob_spawn_index)
+    while mob_spawn_index < len(mob_spawns) and runtime > mob_spawns[mob_spawn_index]:
+        mob_spawn_index += 1
         m = Mob()
         all_sprites.add(m)
         mobs.add(m)
     while runtime > 1.2 * wind_spawn_index:
         wind_spawn_index += 1
 
-<<<<<<< Updated upstream
-    # Check if a mob hits the player
-    hits = pygame.sprite.spritecollide(player, mobs, False)
-    if hits:
-        player.health -= 1  # Reduce health only once
-        for mob in hits:  # Optional: Reset the positions of mobs that collided
-            mob.rect.x = random.randrange(WIDTH - mob.rect.width)
-            mob.rect.y = random.randrange(-100, -40)
-            mob.speedy = random.randrange(1, 8)
-        if player.health <= 0:
-            running = False
-
-    # Draw / render
-    screen.fill(BLACK)
-    screen.blit(background, background_rect)
-=======
         push_speedx = 5
         if wind_spawn_index % 2 == 0: push_speedx = -5
         w = Wind(push_speedx)
@@ -259,10 +203,8 @@ while running:
     # Draw / render
     screen.fill(BLACK)
     back_sprites.draw(screen)
->>>>>>> Stashed changes
     all_sprites.draw(screen)
-
-    # Flip the display
+    # *after* drawing everything, flip the display
     pygame.display.flip()
 
 pygame.quit()
